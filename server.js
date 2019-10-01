@@ -1,24 +1,17 @@
 require('dotenv').config()
 
 const Hapi = require('@hapi/hapi')
-const bcrypt = require('bcrypt')
-const uuid = require('uuid')
-const jwt = require('jsonwebtoken')
-
-const ephDatabase = []
-
-const hashPassword = function (password) {
-  const saltRounds = 10
-  return bcrypt.hash(password, saltRounds)
-}
+const glob = require('glob')
+const path = require('path')
+const ephDatabase = require('./db.js')
 
 const validate = async function (decoded, req, h) {
   // This function will validate decoded JWT against database
   const user = ephDatabase.find(user => user.id === decoded.id)
   if (user && user.id) {
-    return { valid: true }
+    return { isValid: true }
   } else {
-    return { valid: false }
+    return { isValid: false }
   }
 }
 
@@ -29,27 +22,25 @@ const routes = [
     handler: (request, h) => {
       return 'Hello, World!'
     }
-  },
-  {
-    method: 'POST',
-    path: '/api/users',
-    handler: async (request, h) => {
-      const user = {
-        id: uuid(),
-        name: request.payload.username,
-        email: request.payload.email,
-        hash: await hashPassword(request.payload.password)
-      }
-
-      // Save to DB
-      ephDatabase.push(user)
-      console.log(`db.query: ${JSON.stringify(ephDatabase)}`)
-      // Return signed token
-      const token = jwt.sign({ id: user.id, scopes: 'user' }, process.env.SERVER_KEY)
-      return h.response({ token }).code(201)
-    }
   }
 ]
+
+const registerApiRoutes = (server) => {
+  return new Promise((resolve, reject) => {
+    glob('api/**/routes.js', { root: __dirname }, (err, files) => {
+      if (err) {
+        reject(err)
+        return
+      }
+
+      files.forEach(file => {
+        const route = require(path.join(__dirname, file))
+        server.route(route)
+      })
+      resolve()
+    })
+  })
+}
 
 const init = async () => {
   const server = Hapi.server({
@@ -70,6 +61,9 @@ const init = async () => {
 
   // Register routes
   server.route(routes)
+
+  // Register routes under api
+  await registerApiRoutes(server)
 
   await server.start()
   console.log(`server is running on ${server.info.uri}`)
