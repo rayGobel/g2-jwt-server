@@ -1,0 +1,29 @@
+{
+  "name": "g2-jwt-server",
+  "version": "0.1.0",
+  "description": "JSON Web Token with HAPI Server",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "github.com/rayGobel/g2-jwt-server"
+  },
+  "author": "Raynal R. Gobel",
+  "license": "MIT",
+  "dependencies": {
+    "@hapi/boom": "^8.0.1",
+    "@hapi/hapi": "^18.4.0",
+    "@hapi/joi": "^16.1.4",
+    "bcrypt": "^3.0.6",
+    "dotenv": "^8.1.0",
+    "glob": "^7.1.4",
+    "hapi-auth-jwt2": "^8.6.2",
+    "jsonwebtoken": "^8.5.1",
+    "uuid": "^3.3.3"
+  },
+  "devDependencies": {
+    "standard": "^14.3.1"
+  }
+}
