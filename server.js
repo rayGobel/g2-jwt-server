@@ -7,8 +7,16 @@ const ephDatabase = require('./db.js')
 
 const validate = async function (decoded, req, h) {
   // This function will validate decoded JWT against database
+  let now = Date.now()
+  now = Number(now.toString().substring(0, 10))
   const user = ephDatabase.find(user => user.id === decoded.id)
-  if (user && user.id) {
+  const isValidUser = user && user.id
+  const isExpired = now - decoded.iat > 5 * 60 // 5 min
+
+  console.log('Now: ', now)
+  console.log('Decoded: ', decoded.iat)
+
+  if (isValidUser && !isExpired) {
     return { isValid: true }
   } else {
     return { isValid: false }
